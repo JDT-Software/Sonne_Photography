@@ -17,10 +17,10 @@ app.use(express.static(__dirname));
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // or 'outlook', 'yahoo', etc.
+    service: 'gmail',
     auth: {
-        user: 'your-email@gmail.com',
-        pass: 'your-app-password' // Use app-specific password
+        user: 'info.sonnephotography@gmail.com',
+        pass: 'ovfyxbfedlhgnvzo'
     }
 });
 
@@ -30,7 +30,7 @@ app.post('/send-email', async (req, res) => {
 
     const mailOptions = {
         from: email,
-        to: 'your-email@gmail.com', // Where you want to receive messages
+        to: 'info.sonnephotography@gmail.com',
         subject: `New Contact Form Message from ${name}`,
         text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
         html: `
