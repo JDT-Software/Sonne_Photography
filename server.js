@@ -5,7 +5,7 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -15,12 +15,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files (your HTML, CSS, JS)
 app.use(express.static(__dirname));
 
-// Configure nodemailer transporter
+// Configure nodemailer transporter with explicit settings
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
-        user: 'info.sonnephotography@gmail.com',
-        pass: 'ovfyxbfedlhgnvzo'
+        user: process.env.EMAIL_USER || 'info.sonnephotography@gmail.com',
+        pass: process.env.EMAIL_PASS || 'ovfyxbfedlhgnvzo'
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
@@ -29,8 +34,9 @@ app.post('/send-email', async (req, res) => {
     const { name, email, message } = req.body;
 
     const mailOptions = {
-        from: email,
-        to: 'info.sonnephotography@gmail.com',
+        from: process.env.EMAIL_USER || 'info.sonnephotography@gmail.com',
+        to: process.env.EMAIL_USER || 'info.sonnephotography@gmail.com',
+        replyTo: email,
         subject: `New Contact Form Message from ${name}`,
         text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
         html: `
@@ -52,5 +58,5 @@ app.post('/send-email', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
