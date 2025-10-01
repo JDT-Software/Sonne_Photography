@@ -1,8 +1,7 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,30 +11,19 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files (your HTML, CSS, JS)
+// Serve static files
 app.use(express.static(__dirname));
 
-// Configure nodemailer transporter with explicit settings
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER || 'info.sonnephotography@gmail.com',
-        pass: process.env.EMAIL_PASS || 'ovfyxbfedlhgnvzo'
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+// Configure SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Handle form submission
 app.post('/send-email', async (req, res) => {
     const { name, email, message } = req.body;
 
-    const mailOptions = {
-        from: process.env.EMAIL_USER || 'info.sonnephotography@gmail.com',
-        to: process.env.EMAIL_USER || 'info.sonnephotography@gmail.com',
+    const msg = {
+        to: 'info.sonnephotography@gmail.com',
+        from: 'info.sonnephotography@gmail.com', // Must be your verified sender
         replyTo: email,
         subject: `New Contact Form Message from ${name}`,
         text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
@@ -49,10 +37,10 @@ app.post('/send-email', async (req, res) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(msg);
         res.status(200).json({ success: true, message: 'Email sent successfully!' });
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Error sending email:', error.response ? error.response.body : error);
         res.status(500).json({ success: false, message: 'Failed to send email.' });
     }
 });
